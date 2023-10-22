@@ -205,9 +205,13 @@ class AgarEnv(gym.Env):
         observations_dict = {}
         observations = []
         for i in range(self.num_agents):
-            observations_agent, dict_agent = self.parse_obs(self.agents[i], i)
-            observations.append(observations_agent)
-            observations_dict["t" + str(i)] = dict_agent
+            try:
+                observations_agent, dict_agent = self.parse_obs(self.agents[i], i)
+                observations.append(observations_agent)
+                observations_dict["t" + str(i)] = dict_agent
+            except:
+                observations.append(np.zeros(578))
+                observations_dict["t" + str(i)] = {"metadata": {"is_killed": True}}
         if self.num_agents > 1:
             t_dis = (
                 self.agents[0].centerPos.clone().sub(self.agents[1].centerPos).sqDist()

@@ -4,7 +4,7 @@ from agar.Env import AgarEnv
 import time
 
 render = True
-num_agents = 2
+num_agents = 5
 
 
 class Args:
@@ -45,13 +45,26 @@ def on_key_press(k, modifiers):
         action[0][2] = 0
 
 
+def calculate_reward(observations):
+    total_rewards = []
+    for agent in observations:
+        if observations[agent]["metadata"]["is_killed"]:
+            observations[agent] = 0
+            continue
+        reward = 0
+        for food in observations[agent]["food"]:
+            reward += 1 / food["relative_position_x^2 + relative_position_y^2"]
+        total_rewards.append(reward)
+    return total_rewards
+
+
 start = time.time()
 ca = 100
 for episode in range(1):
     observation = env.reset()
     while ca:
         ca -= 1
-        time.sleep(0.02)
+        time.sleep(0.04)
         if step % 40 == 0:
             print("step", step)
             print(step / (time.time() - start))
@@ -64,8 +77,9 @@ for episode in range(1):
         a = action.reshape(-1)
         observations, rewards, done, info, new_obs = env.step(a)
         # print(step, rewards)
-        print(rewards)
+        # print(rewards)
         # print(observations["t0"].shape)
-        action[0][2] = 0
+        rewards = calculate_reward(new_obs)
+        print(rewards)
         step += 1
 env.close()

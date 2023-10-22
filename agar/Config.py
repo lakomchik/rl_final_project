@@ -76,7 +76,7 @@ class Config:
         self.foodMinRadius = 10  # Minimum food radius (vanilla 10)
         self.foodMaxRadius = 20  # Maximum food radius (vanilla 20)
         self.foodMinAmount = 1000 // rate**2  # Minimum food cells on the map
-        self.foodMaxAmount = 2000 // rate**2  # Maximum food cells on the map
+        self.foodMaxAmount = 1000000 // rate**2  # Maximum food cells on the map
         self.foodSpawnAmount = (
             100 // rate**2
         )  # The number of food to spawn per interval
