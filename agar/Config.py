@@ -21,9 +21,9 @@ class Config:
         self.serverGamemode = (
             0  # Gamemodes= 0 = FFA 1 = Teams 2 = Experimental 3 = Rainbow
         )
-        self.serverBots = 10  # Number of player bots to spawn (Experimental)
-        self.serverViewBaseX = 2000  # Base view distance of players. Warning= high values may cause lag! Min value is 1920x1080
-        self.serverViewBaseY = 1500  # min value is 1920x1080
+        self.serverBots = 0  # Number of player bots to spawn (Experimental)
+        self.serverViewBaseX = 1920  # Base view distance of players. Warning= high values may cause lag! Min value is 1920x1080
+        self.serverViewBaseY = 1080  # min value is 1920x1080
         self.serverMinScale = 0.15  # Minimum viewbox scale for player (low value leads to lags due to large visible area for big cell)
         self.serverSpectatorScale = 0.4  # Scale (field of view) used for free roam spectators (low value leads to lags vanilla = 0.4 old vanilla = 0.25)
         self.serverStatsPort = 88  # Port for stats server. Having a negative number will disable the stats server.
@@ -78,11 +78,11 @@ class Config:
         self.foodMinAmount = 1000 // rate**2  # Minimum food cells on the map
         self.foodMaxAmount = 2000 // rate**2  # Maximum food cells on the map
         self.foodSpawnAmount = (
-            30 // rate**2
+            100 // rate**2
         )  # The number of food to spawn per interval
         self.foodMassGrow = 1  # Enable food mass grow ?
         self.spawnInterval = (
-            20  # The interval between each food cell spawn in ticks (1 tick = 40 ms)
+            5  # The interval between each food cell spawn in ticks (1 tick = 40 ms)
         )
 
         # VIRUSES

@@ -13,6 +13,7 @@ import numpy as np
 from copy import deepcopy
 from .modules import Vec2
 import random
+from collections import defaultdict
 
 
 def max(a, b):
@@ -123,7 +124,7 @@ class AgarEnv(gym.Env):
                 for j in range(self.num_agents):
                     actions[j * 3 + 2] = -1.0
             first = False
-            o, r = self.step_(actions)
+            o, r, new_obs = self.step_(actions)
             reward += r
 
         self.m_g *= self.g
@@ -168,7 +169,7 @@ class AgarEnv(gym.Env):
                 else:
                     info[i]["bad_transition"] = True
 
-        return o, reward, done, info
+        return o, reward, done, info, new_obs
 
     def step_(self, actions_):
         actions = deepcopy(actions_)
@@ -201,9 +202,12 @@ class AgarEnv(gym.Env):
                     rewards[i] += t_rewards[j] * self.coop_eps[i]
 
         self.split = np.zeros(self.num_agents)
-        observations = [
-            self.parse_obs(self.agents[i], i, actions) for i in range(self.num_agents)
-        ]
+        observations_dict = {}
+        observations = []
+        for i in range(self.num_agents):
+            observations_agent, dict_agent = self.parse_obs(self.agents[i], i)
+            observations.append(observations_agent)
+            observations_dict["t" + str(i)] = dict_agent
         if self.num_agents > 1:
             t_dis = (
                 self.agents[0].centerPos.clone().sub(self.agents[1].centerPos).sqDist()
@@ -226,7 +230,7 @@ class AgarEnv(gym.Env):
         self.s_n += 1
 
         observations = {"t" + str(i): observations[i] for i in range(self.num_agents)}
-        return observations, rewards
+        return observations, rewards, observations_dict
 
     """
     function reset:
@@ -278,9 +282,12 @@ class AgarEnv(gym.Env):
             self.server.addPlayers(self.players)
             self.viewer = None
             self.server.Update()
-            observations = [
-                self.parse_obs(self.agents[i], i) for i in range(self.num_agents)
-            ]
+            observations_dict = {}
+            observations = []
+            for i in range(self.num_agents):
+                observations_agent, dict_agent = self.parse_obs(self.agents[i], i)
+                observations.append(observations_agent)
+                observations_dict["t" + str(i)] = dict_agent
             success = True
             for i in range(self.num_agents):
                 if (
@@ -332,8 +339,17 @@ class AgarEnv(gym.Env):
         if len(player.cells) == 0:
             return np.zeros(s_size)
         obs = [[], [], [], [], []]
+        res_obs_dict = defaultdict(list)
+        obs_keys = {
+            0: "self",
+            1: "food",
+            2: "virus",
+            3: "script_agent",
+            4: "outside",
+        }
         for cell in player.viewNodes:
-            t, feature = self.cell_obs(cell, player, id)
+            (t, feature, obs_dict) = self.cell_obs(cell, player, id)
+            res_obs_dict[obs_keys[t]].append(obs_dict)
             obs[t].append(feature)
 
         for i in range(len(obs)):
@@ -391,7 +407,14 @@ class AgarEnv(gym.Env):
         obs_f[-27] = 0
         obs_f[-28] = 0
 
-        return deepcopy(obs_f)
+        res_obs_dict["metadata"] = {
+            "is_killed": self.killed[id] != 0,
+            "position_x": position_x,
+            "position_y": position_y,
+            "last_action": self.last_action[id * 3 : id * 3 + 3],
+        }
+
+        return deepcopy(obs_f), deepcopy(res_obs_dict)
 
     def cell_obs(self, cell, player, id):
         if cell.cellType == 0:
@@ -451,6 +474,30 @@ class AgarEnv(gym.Env):
                 float(cell.radius * 1.15 > player.mincell().radius),
                 cell.position.sqDist() / self.server.config.r,
             ]
+            dict_players = {
+                "relative_position_x": relative_position_x,
+                "relative_position_y": relative_position_y,
+                "position_x": position_x,
+                "position_y": position_y,
+                "boost_x": boost_x,
+                "boost_y": boost_y,
+                "radius": radius,
+                "log_radius": log_radius,
+                "canRemerge": float(cell.canRemerge == True),
+                "relative_position_x^2 + relative_position_y^2": relative_position_x
+                ** 2
+                + relative_position_y**2,
+                "v_x": v_x,
+                "v_y": v_y,
+                "cell.radius * 1.15 > player.maxcell().radius": float(
+                    cell.radius * 1.15 > player.maxcell().radius
+                ),
+                "cell.radius * 1.15 > player.mincell().radius": float(
+                    cell.radius * 1.15 > player.mincell().radius
+                ),
+                "cell.position.sqDist() / self.server.config.r": cell.position.sqDist()
+                / self.server.config.r,
+            }
             if cell.owner == player:
                 c_t = 0
                 if boost_x or boost_y:
@@ -459,7 +506,8 @@ class AgarEnv(gym.Env):
                 c_t = 4
             else:
                 c_t = 3
-            return c_t, features_player
+            dict_players["cellType"] = c_t
+            return c_t, features_player, dict_players
 
         elif cell.cellType == 1:
             # food features
@@ -510,7 +558,19 @@ class AgarEnv(gym.Env):
                 log_radius,
                 relative_position_x**2 + relative_position_y**2,
             ]
-            return cell.cellType, features_food
+            dict_food = {
+                "relative_position_x": relative_position_x,
+                "relative_position_y": relative_position_y,
+                "position_x": position_x,
+                "position_y": position_y,
+                "radius": radius,
+                "log_radius": log_radius,
+                "relative_position_x^2 + relative_position_y^2": relative_position_x
+                ** 2
+                + relative_position_y**2,
+            }
+            dict_food["cellType"] = 1
+            return cell.cellType, features_food, dict_food
 
         elif cell.cellType == 2:
             # virus features
@@ -570,7 +630,17 @@ class AgarEnv(gym.Env):
                 position_y,
                 relative_position_x**2 + relative_position_y**2,
             ]
-            return cell.cellType, features_virus
+            dict_viurs = {
+                "relative_position_x": relative_position_x,
+                "relative_position_y": relative_position_y,
+                "position_x": position_x,
+                "position_y": position_y,
+                "relative_position_x^2 + relative_position_y^2": relative_position_x
+                ** 2
+                + relative_position_y**2,
+            }
+            dict_viurs["cellType"] = 2
+            return cell.cellType, features_virus, dict_viurs
 
         elif cell.cellType == 3:
             return None  # I didn't consider action and observation of ejection also I still implement it.
@@ -691,7 +761,7 @@ class AgarEnv(gym.Env):
         self.geoms_to_render = []
         if render_player:
             self.render_dir(self.players[playeridx].centerPos)
-            print(self.players[playeridx].centerPos)
+        # print(self.players[playeridx].centerPos)
         else:
             self.render_dir(Vec2(1000, 1000))
         for node in self.players[playeridx].viewNodes:
