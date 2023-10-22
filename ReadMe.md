@@ -19,11 +19,9 @@ However, training was implemented only on the agent's motion action space withou
 ## How to install
 1. Make sure that you have pillow gym pyglet in another way install them
 
-\```python 
-pip install pillow gym pyglet==1.5.27
-\```
+'pip install pillow gym pyglet==1.5.27'
+
 
 2. Install baselines 
-\```python 
-python baselines/setup.py install
-\```
+
+'python baselines/setup.py install'
