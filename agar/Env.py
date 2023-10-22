@@ -61,10 +61,12 @@ class AgarEnv(gym.Env):
         self.num_agents = (
             args.num_controlled_agent
         )  # number of agents controlled outside
+
         self.action_space = spaces.Box(
             low=-1, high=1, shape=(3,)
         )  # action = [x(real), y(real), split(bool)
         obs_size = 578
+        self.num_bots = 0
         self.observation_space = spaces.Dict(
             {
                 "t" + str(i): spaces.Box(low=-100, high=100, shape=(578,))
@@ -202,19 +204,19 @@ class AgarEnv(gym.Env):
         observations = [
             self.parse_obs(self.agents[i], i, actions) for i in range(self.num_agents)
         ]
-        try:
+        if self.num_agents > 1:
             t_dis = (
                 self.agents[0].centerPos.clone().sub(self.agents[1].centerPos).sqDist()
                 / self.server.config.r
             )
-        except:
+        else:
             t_dis = 0
         self.sum_dis += t_dis
         self.near = t_dis <= 0.5
-        try:
+        if self.num_agents > 1:
             if self.killed[0] + self.killed[1] > 0:
                 self.near = False
-        except:
+        else:
             self.near = False
         self.last_action = deepcopy(actions.reshape(-1))
         self.sum_r += rewards
@@ -237,7 +239,6 @@ class AgarEnv(gym.Env):
     def reset(self):
 
         while 1:
-            self.num_bots = 0
             self.num_players = self.num_bots + self.num_agents
             self.rewards_forced = [0 for i in range(self.num_agents)]
             self.stop_step = 2000 - random.randint(0, 100) * self.action_repeat
@@ -269,6 +270,7 @@ class AgarEnv(gym.Env):
                 low = min(1.0, max(0.0, (self.total_step - 1e7) / 5e6))
                 self.bot_speed = rand(low, up)
             self.server = GameServer(self)
+            self.num_bots = self.server.config.serverBots
             self.server.start(self.gamemode)
             self.agents = [Player(self.server) for _ in range(self.num_agents)]
             self.bots = [Bot(self.server) for _ in range(self.num_bots)]

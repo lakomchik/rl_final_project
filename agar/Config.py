@@ -21,7 +21,7 @@ class Config:
         self.serverGamemode = (
             0  # Gamemodes= 0 = FFA 1 = Teams 2 = Experimental 3 = Rainbow
         )
-        self.serverBots = 0  # Number of player bots to spawn (Experimental)
+        self.serverBots = 10  # Number of player bots to spawn (Experimental)
         self.serverViewBaseX = 2000  # Base view distance of players. Warning= high values may cause lag! Min value is 1920x1080
         self.serverViewBaseY = 1500  # min value is 1920x1080
         self.serverMinScale = 0.15  # Minimum viewbox scale for player (low value leads to lags due to large visible area for big cell)
@@ -31,7 +31,6 @@ class Config:
         self.mobilePhysics = 0  # Whether or not the server uses mobile agar.io physics
         self.badWordFilter = 1  # Toggle whether you want the bad word filter on (0 to disable 1 to enable)
         self.serverRestart = 0  # Toggle whether you want your server to auto restart in minutes. (0 to disable)
-
         # CLIENT
         self.serverMaxLB = (
             10  # Controls the maximum players displayed on the leaderboard.
