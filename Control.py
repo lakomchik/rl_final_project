@@ -46,12 +46,12 @@ def on_key_press(k, modifiers):
 
 
 start = time.time()
-ca = 1000
+ca = 200
 for episode in range(1):
     observation = env.reset()
     while ca:
         ca -= 1
-        time.sleep(0.01)
+        time.sleep(0.02)
         if step % 40 == 0:
             print("step", step)
             print(step / (time.time() - start))
