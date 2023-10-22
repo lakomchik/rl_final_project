@@ -4,7 +4,7 @@ from agar.Env import AgarEnv
 import time
 
 render = True
-num_agents = 1
+num_agents = 2
 
 
 class Args:
@@ -46,7 +46,7 @@ def on_key_press(k, modifiers):
 
 
 start = time.time()
-ca = 200
+ca = 100
 for episode in range(1):
     observation = env.reset()
     while ca:
@@ -62,9 +62,10 @@ for episode in range(1):
                 window.on_key_press = on_key_press
                 window.on_mouse_motion = on_mouse_motion
         a = action.reshape(-1)
-        observations, rewards, done, info = env.step(a)
+        observations, rewards, done, info, new_obs = env.step(a)
         # print(step, rewards)
-        print(observations["t0"].shape)
+        print(rewards)
+        # print(observations["t0"].shape)
         action[0][2] = 0
         step += 1
 env.close()
