@@ -25,3 +25,7 @@ However, training was implemented only on the agent's motion action space withou
 2. Install baselines 
 
 `python baselines/setup.py install`
+
+3. If you have some issues with tensorflow do the following command:
+   
+   `pip install tensorflow --upgrade`
