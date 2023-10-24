@@ -5,6 +5,7 @@ import time
 
 render = True
 num_agents = 5
+from agar.Config import Config
 
 
 class Args:
@@ -29,12 +30,15 @@ window = None
 action = np.zeros((num_agents, 3))
 
 
+config = Config()
+
+
 def on_mouse_motion(x, y, dx, dy):
-    action[0][0] = (x / 1920 - 0.5) * 2
-    action[0][1] = (y / 1080 - 0.5) * 2
-    for i in range(1, num_agents):
-        action[i][0] = action[0][0] + np.random.normal(0, 0.1)
-        action[i][1] = action[0][1] + np.random.normal(0, 0.1)
+    action[0][0] = (x / config.serverViewBaseX - 0.5) * 2
+    action[0][1] = (y / config.serverViewBaseY - 0.5) * 2
+    # for i in range(1, num_agents):
+    #     action[i][0] = action[0][0] + np.random.normal(0, 0.1)
+    #     action[i][1] = action[0][1] + np.random.normal(0, 0.1)
 
 
 def on_key_press(k, modifiers):
@@ -45,21 +49,8 @@ def on_key_press(k, modifiers):
         action[0][2] = 0
 
 
-def calculate_reward(observations):
-    total_rewards = []
-    for agent in observations:
-        if observations[agent]["metadata"]["is_killed"]:
-            observations[agent] = 0
-            continue
-        reward = 0
-        for food in observations[agent]["food"]:
-            reward += 1 / food["relative_position_x^2 + relative_position_y^2"]
-        total_rewards.append(reward)
-    return total_rewards
-
-
 start = time.time()
-ca = 100
+ca = 1000
 for episode in range(1):
     observation = env.reset()
     while ca:
@@ -79,7 +70,7 @@ for episode in range(1):
         # print(step, rewards)
         # print(rewards)
         # print(observations["t0"].shape)
-        rewards = calculate_reward(new_obs)
+
         print(rewards)
         step += 1
 env.close()
