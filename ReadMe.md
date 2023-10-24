@@ -26,6 +26,22 @@ However, training was implemented only on the agent's motion action space withou
 
 `python baselines/setup.py install`
 
-3. If you have some issues with tensorflow do the following command:
-   
-   `pip install tensorflow --upgrade`
+## Useful info
+    res_obs_dict the main dictionary that contains the observation space for each agent in the game. 
+    It has 2 dict keys, "obs_keys" and "metadata".
+
+    obs_keys is the dictionary that contains the exact observation space for each agent in the game. 
+            0: "self" 
+            1: "food"
+            2: "virus"
+            3: "script_agent"
+            4: "outside"
+
+
+    res_obs_dict["metadata"]  is the dictionary that contains the exact observation about each agent in the game itself.
+
+    There are 4 keys in the metadata dictionary, and each key corresponds to an agent. 
+        "is_killed": indicates if the agent is killed or not
+        "position_x": indicates the x coordinate of the agent
+        "position_y": indicates the y coordinate of the agent
+        "last_action": indicates the last action of the agent such as angle and speed
