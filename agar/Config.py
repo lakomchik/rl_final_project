@@ -21,7 +21,7 @@ class Config:
         self.serverGamemode = (
             0  # Gamemodes= 0 = FFA 1 = Teams 2 = Experimental 3 = Rainbow
         )
-        self.serverBots = 20  # Number of player bots to spawn (Experimental)
+        self.serverBots = 4  # Number of player bots to spawn (Experimental)
         self.serverViewBaseX = 800  # Base view distance of players. Warning= high values may cause lag! Min value is 1920x1080
         self.serverViewBaseY = 800  # min value is 1920x1080
         self.serverMinScale = 0.15  # Minimum viewbox scale for player (low value leads to lags due to large visible area for big cell)
@@ -66,10 +66,10 @@ class Config:
         # BORDER
         rate = 4 / 1.128
         self.borderWidth = (
-            14142.135623730952 / rate
+            8000.135623730952 / rate
         )  # Map border radius (Vanilla value= 14142)
         self.borderHeight = (
-            14142.135623730952 / rate
+            8000.135623730952 / rate
         )  # Map border radius (Vanilla value= 14142)
         self.r = self.borderWidth / 2
         # FOOD # change here 1.25
