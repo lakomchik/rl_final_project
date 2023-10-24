@@ -21,7 +21,7 @@ class Config:
         self.serverGamemode = (
             0  # Gamemodes= 0 = FFA 1 = Teams 2 = Experimental 3 = Rainbow
         )
-        self.serverBots = 0  # Number of player bots to spawn (Experimental)
+        self.serverBots = 20  # Number of player bots to spawn (Experimental)
         self.serverViewBaseX = 800  # Base view distance of players. Warning= high values may cause lag! Min value is 1920x1080
         self.serverViewBaseY = 800  # min value is 1920x1080
         self.serverMinScale = 0.15  # Minimum viewbox scale for player (low value leads to lags due to large visible area for big cell)

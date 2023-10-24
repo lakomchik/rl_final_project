@@ -168,7 +168,7 @@ class AgarEnv(gym.Env):
                     actions[j * 3 + 2] = -1.0
             first = False
             o, _, new_obs = self.step_(actions)
-            print(len(new_obs))
+
             reward += self.calculate_reward(new_obs)
 
         self.m_g *= self.g
