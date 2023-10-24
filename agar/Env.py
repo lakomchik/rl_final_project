@@ -86,6 +86,9 @@ class AgarEnv(gym.Env):
         # factors for reward
         self.action_repeat = args.action_repeat
 
+
+        self.action = np.zeros((self.num_agents, 3))
+
     """
     function step:
 
@@ -157,6 +160,7 @@ class AgarEnv(gym.Env):
     def step(self, actions_):
 
         actions = deepcopy(actions_)
+        self.actions= actions
         reward = np.zeros((self.num_agents,))
         done = np.zeros((self.num_agents,))
         info = [{} for i in range(self.num_agents)]
@@ -168,7 +172,7 @@ class AgarEnv(gym.Env):
                     actions[j * 3 + 2] = -1.0
             first = False
             o, _, new_obs = self.step_(actions)
-            print(len(new_obs))
+            # print(len(new_obs))
             reward += self.calculate_reward(new_obs)
 
         self.m_g *= self.g
@@ -937,8 +941,20 @@ class AgarEnv(gym.Env):
             self.viewer.close()
             self.viewer = None
 
+    def data_vector_cast(self):
+        # How to get actions
+        actions_out= self.actions
+        _, _, observation_out = self.step_(actions_out)
+        reward_out = self.calculate_reward(observation_out)
+        test=observation_out["t0"]["food"]
+        test_2=np.array(test)
+        print(test_2)
+        print(f"observation_out:{test}\n reward_out:{reward_out}\n  reward:{reward_out}")
+        # np.save()
+        pass
 
 def onehot(d, ndim):
     v = [0.0 for i in range(ndim)]
     v[d] = 1.0
     return v
+
