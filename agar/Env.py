@@ -111,6 +111,49 @@ class AgarEnv(gym.Env):
                 when bad_transition is False, the state and the next state has no transition relationship
     """
 
+    def calculate_reward(self, observations):
+        total_rewards = []
+        max_food_reward = 5
+        mass_multiplier = 100
+        virus_multiplier = 20
+        other_agent_multiplier = 20
+        for agent in observations:
+            if observations[agent]["metadata"]["is_killed"]:
+                total_rewards.append(0.0)
+                continue
+            reward = 0.0
+            for food in observations[agent]["food"]:
+                reward += np.clip(
+                    1 / food["relative_position_x^2 + relative_position_y^2"],
+                    0,
+                    max_food_reward,
+                )
+            for virus in observations[agent]["virus"]:
+                if virus["radius"] < observations[agent]["metadata"]["max_radius"]:
+                    reward -= (
+                        1
+                        / virus["relative_position_x^2 + relative_position_y^2"]
+                        * virus_multiplier
+                    )
+            for script_agent in (
+                observations[agent]["script_agent"] + observations[agent]["outside"]
+            ):
+                if script_agent["cell.radius * 1.15 > player.maxcell().radius"] > 0.5:
+                    reward -= (
+                        1
+                        / script_agent["relative_position_x^2 + relative_position_y^2"]
+                        * other_agent_multiplier
+                    )
+                else:
+                    reward += (
+                        1
+                        / script_agent["relative_position_x^2 + relative_position_y^2"]
+                        * other_agent_multiplier
+                    )
+            reward += observations[agent]["metadata"]["mass"] * mass_multiplier
+            total_rewards.append(reward)
+        return np.array(total_rewards)
+
     def step(self, actions_):
 
         actions = deepcopy(actions_)
@@ -124,8 +167,9 @@ class AgarEnv(gym.Env):
                 for j in range(self.num_agents):
                     actions[j * 3 + 2] = -1.0
             first = False
-            o, r, new_obs = self.step_(actions)
-            reward += r
+            o, _, new_obs = self.step_(actions)
+            print(len(new_obs))
+            reward += self.calculate_reward(new_obs)
 
         self.m_g *= self.g
         done = done != 0
@@ -168,7 +212,6 @@ class AgarEnv(gym.Env):
                     info[i]["bad_transition"] = False
                 else:
                     info[i]["bad_transition"] = True
-
         return o, reward, done, info, new_obs
 
     def step_(self, actions_):
@@ -205,9 +248,13 @@ class AgarEnv(gym.Env):
         observations_dict = {}
         observations = []
         for i in range(self.num_agents):
-            observations_agent, dict_agent = self.parse_obs(self.agents[i], i)
-            observations.append(observations_agent)
-            observations_dict["t" + str(i)] = dict_agent
+            try:
+                observations_agent, dict_agent = self.parse_obs(self.agents[i], i)
+                observations.append(observations_agent)
+                observations_dict["t" + str(i)] = dict_agent
+            except:
+                observations.append(np.zeros(578))
+                observations_dict["t" + str(i)] = {"metadata": {"is_killed": True}}
         if self.num_agents > 1:
             t_dis = (
                 self.agents[0].centerPos.clone().sub(self.agents[1].centerPos).sqDist()
@@ -412,6 +459,9 @@ class AgarEnv(gym.Env):
             "position_x": position_x,
             "position_y": position_y,
             "last_action": self.last_action[id * 3 : id * 3 + 3],
+            "mass": sum([c.mass for c in player.cells]) / 50,
+            "max_radius": player.maxcell().radius,
+            "min_radius": player.mincell().radius,
         }
 
         return deepcopy(obs_f), deepcopy(res_obs_dict)
@@ -635,6 +685,7 @@ class AgarEnv(gym.Env):
                 "relative_position_y": relative_position_y,
                 "position_x": position_x,
                 "position_y": position_y,
+                "radius": cell.radius,
                 "relative_position_x^2 + relative_position_y^2": relative_position_x
                 ** 2
                 + relative_position_y**2,

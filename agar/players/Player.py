@@ -1,8 +1,9 @@
 from ..modules import *
 import math
 
+
 class Player:
-    def __init__(self, gameServer, name = 'dummy', id = None):
+    def __init__(self, gameServer, name="dummy", id=None):
         self.gameServer = gameServer
         self.name = name
         self.mouse = Vec2(0, 0)
@@ -19,7 +20,7 @@ class Player:
         self.lastEject = None
         self.config = gameServer.config
         self.killreward = 0
-        self.killedreward = 0 
+        self.killedreward = 0
 
         if gameServer:
             if id is None:
@@ -31,23 +32,33 @@ class Player:
             self.joinGame()
             self.updateView()
 
-    def step(self, action, *kargs, **kwargs):    # Hxu: action now is a N by 3 matrix
+    def step(self, action, *kargs, **kwargs):  # Hxu: action now is a N by 3 matrix
         self.killreward = 0
-        self.killedreward = 0 
+        self.killedreward = 0
 
         if len(self.cells) == 0:
             self.isRemoved = True
         if self.isRemoved:
             return
-        
-        if action[0] < -1:action[0] = -1
-        if action[1] < -1:action[1] = -1
-        if action[0] >  1:action[0] = 1
-        if action[1] >  1:action[1] = 1
+
+        if action[0] < -1:
+            action[0] = -1
+        if action[1] < -1:
+            action[1] = -1
+        if action[0] > 1:
+            action[0] = 1
+        if action[1] > 1:
+            action[1] = 1
 
         # action in format [0] mouse x, [1 mouse y, [2] key space bool, [3] key w bool, [4] no key bool
         assert action[0] >= -1 and action[0] <= 1 and action[1] >= -1 and action[1] <= 1
-        self.mouse = self.centerPos.add(Vec2(action[0] * self.gameServer.config.serverViewBaseX, action[1] * self.gameServer.config.serverViewBaseY), 1)
+        self.mouse = self.centerPos.add(
+            Vec2(
+                action[0] * self.gameServer.config.serverViewBaseX,
+                action[1] * self.gameServer.config.serverViewBaseY,
+            ),
+            1,
+        )
         # assert np.sum(action[2:]) == 1
         if action[2] == 0:
             self.pressSpace()
@@ -66,7 +77,7 @@ class Player:
         for cell in self.cells:
             cx += cell.position.x / len(self.cells)
             cy += cell.position.y / len(self.cells)
-        self.centerPos = Vec2(cx , cy)
+        self.centerPos = Vec2(cx, cy)
         scale = max(self.getScale(), self.gameServer.config.serverMinScale)
         halfWidth = (self.gameServer.config.serverViewBaseX + 100) / scale / 2
         halfHeight = (self.gameServer.config.serverViewBaseY + 100) / scale / 2
@@ -74,12 +85,15 @@ class Player:
             self.centerPos.x - halfWidth,
             self.centerPos.y - halfHeight,
             self.centerPos.x + halfWidth,
-            self.centerPos.y + halfHeight)
+            self.centerPos.y + halfHeight,
+        )
 
         self.viewNodes = []
-        self.gameServer.quadTree.find(self.viewBox, lambda check: self.viewNodes.append(check))
+        self.gameServer.quadTree.find(
+            self.viewBox, lambda check: self.viewNodes.append(check)
+        )
         if self.cells:
-            self.maxradius = max(self.cells, key = lambda c : c.radius).radius
+            self.maxradius = max(self.cells, key=lambda c: c.radius).radius
         else:
             self.maxradius = 0
         # self.viewNodes+=self.cells
@@ -115,7 +129,8 @@ class Player:
             self.scale = 0.4
         else:
             rate = 1.0
-            if self.pID < self.gameServer.env.num_agents:rate = 1.5
+            if self.pID < self.gameServer.env.num_agents:
+                rate = 1.5
             self.scale = math.pow(min(64 / scale, 1), 0.4) / rate
         return self.scale
 
@@ -126,14 +141,23 @@ class Player:
 
     def get_view_box(self):
         # notice y positive is upward in opanai gym!
-        return [self.viewBox.minx, self.viewBox.maxx, self.viewBox.miny, self.viewBox.maxy]
-    
+        return [
+            self.viewBox.minx,
+            self.viewBox.maxx,
+            self.viewBox.miny,
+            self.viewBox.maxy,
+        ]
+
     def in_view(self, node):
-        return node.x >= self.viewBox.minx and node.x <= self.viewBox.maxx and node.y >= self.viewBox.miny and node.y <= self.viewBox.maxy
+        return (
+            node.x >= self.viewBox.minx
+            and node.x <= self.viewBox.maxx
+            and node.y >= self.viewBox.miny
+            and node.y <= self.viewBox.maxy
+        )
 
     def maxcell(self):
         return max(self.cells, key=lambda c: c.radius)
 
     def mincell(self):
         return max(self.cells, key=lambda c: c.radius)
-

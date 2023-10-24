@@ -4,7 +4,8 @@ from agar.Env import AgarEnv
 import time
 
 render = True
-num_agents = 2
+num_agents = 5
+from agar.Config import Config
 
 
 class Args:
@@ -29,12 +30,15 @@ window = None
 action = np.zeros((num_agents, 3))
 
 
+config = Config()
+
+
 def on_mouse_motion(x, y, dx, dy):
-    action[0][0] = (x / 1920 - 0.5) * 2
-    action[0][1] = (y / 1080 - 0.5) * 2
-    for i in range(1, num_agents):
-        action[i][0] = action[0][0] + np.random.normal(0, 0.1)
-        action[i][1] = action[0][1] + np.random.normal(0, 0.1)
+    action[0][0] = (x / config.serverViewBaseX - 0.5) * 2
+    action[0][1] = (y / config.serverViewBaseY - 0.5) * 2
+    # for i in range(1, num_agents):
+    #     action[i][0] = action[0][0] + np.random.normal(0, 0.1)
+    #     action[i][1] = action[0][1] + np.random.normal(0, 0.1)
 
 
 def on_key_press(k, modifiers):
@@ -46,12 +50,12 @@ def on_key_press(k, modifiers):
 
 
 start = time.time()
-ca = 100
+ca = 1000
 for episode in range(1):
     observation = env.reset()
     while ca:
         ca -= 1
-        time.sleep(0.02)
+        time.sleep(0.04)
         if step % 40 == 0:
             print("step", step)
             print(step / (time.time() - start))
@@ -64,8 +68,9 @@ for episode in range(1):
         a = action.reshape(-1)
         observations, rewards, done, info, new_obs = env.step(a)
         # print(step, rewards)
-        print(rewards)
+        # print(rewards)
         # print(observations["t0"].shape)
-        action[0][2] = 0
+
+        print(rewards)
         step += 1
 env.close()
