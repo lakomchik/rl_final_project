@@ -1,0 +1,13 @@
+pillow 
+torch
+torchvision
+torchaudio
+torch
+torchvision
+torchaudio
+gym
+pyglet==1.5.27
+numpy
+opencv
+tensorflow
+scipy

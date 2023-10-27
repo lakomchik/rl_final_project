@@ -16,11 +16,12 @@ It was based on [work](https://github.com/buoyancy99/PyAgar) and augmented with 
 
 However, training was implemented only on the agent's motion action space without using 2 features-dividing and leaving a stock of points in the form of food. 
 
+## Requirements
+python 3.7
+
 ## How to install
-1. Make sure that you have pillow gym pyglet in another way install them
-
-`pip install pillow gym pyglet==1.5.27`
-
+1. Install all necessary libraries
+pip3 install -r requirements.txt 
 
 2. Install baselines 
 
@@ -45,3 +46,7 @@ However, training was implemented only on the agent's motion action space withou
         "position_x": indicates the x coordinate of the agent
         "position_y": indicates the y coordinate of the agent
         "last_action": indicates the last action of the agent such as angle and speed
+3. Useful scripts:\
+* `stochastic_full_obs_space.ipynb` - for running stochastic policy approach learning
+* `behavior_cloning.ipynb` - for behavior running clonning (dataset is necessary in data folder by default)
+* `dataset_creator.py` - for saving one episode
