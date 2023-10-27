@@ -1,4 +1,4 @@
-# GacniNet: Reinforcement Learning for Agar.io Multi-Agent System
+# GachiNet: Reinforcement Learning for Agar.io Multi-Agent System
 
 G - "Gameplay" (referring to the game mechanics and experience)
 
