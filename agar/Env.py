@@ -17,14 +17,12 @@ from collections import defaultdict
 
 
 def max(a, b):
-
     if a > b:
         return a
     return b
 
 
 def rand(a, b):
-
     return random.random() * (b - a) + a
 
 
@@ -113,8 +111,8 @@ class AgarEnv(gym.Env):
 
     def calculate_reward(self, observations):
         total_rewards = []
-        max_food_reward = 5
-        mass_multiplier = 100
+        max_food_reward = 5 * 20
+        mass_multiplier = 150 * 20
         virus_multiplier = 20
         other_agent_multiplier = 20
         for agent in observations:
@@ -151,18 +149,17 @@ class AgarEnv(gym.Env):
                         * other_agent_multiplier
                     )
             reward += observations[agent]["metadata"]["mass"] * mass_multiplier
+            reward /= 200
             total_rewards.append(reward)
         return np.array(total_rewards)
 
     def step(self, actions_):
-
         actions = deepcopy(actions_)
         reward = np.zeros((self.num_agents,))
         done = np.zeros((self.num_agents,))
         info = [{} for i in range(self.num_agents)]
         first = True
         for i in range(self.action_repeat):
-
             if not first:
                 for j in range(self.num_agents):
                     actions[j * 3 + 2] = -1.0
@@ -177,7 +174,6 @@ class AgarEnv(gym.Env):
 
         self.killed += self.t_killed != 0
         for i in range(self.num_agents):
-
             info[i]["high_masks"] = True
             info[i]["bad_transition"] = False
             if self.killed[i] >= 1:
@@ -288,7 +284,6 @@ class AgarEnv(gym.Env):
     """
 
     def reset(self):
-
         while 1:
             self.num_players = self.num_bots + self.num_agents
             self.rewards_forced = [0 for i in range(self.num_agents)]
@@ -350,7 +345,6 @@ class AgarEnv(gym.Env):
         return observations
 
     def parse_obs(self, player, id, action=None):
-
         """
 
         function parse_obs will return obs_id
@@ -784,7 +778,6 @@ class AgarEnv(gym.Env):
     def add_dir(
         self, a
     ):  # can be used to add multiple directions of the agent to render, add_dir should be used before render. a = [direction_x_0, direction_y_0, direction_x_1, direction_y_1, ... , direction_x_m-1, direction_y_m-1], m = number of different directions.
-
         self.dir = deepcopy(a)
 
     """    
@@ -797,8 +790,13 @@ class AgarEnv(gym.Env):
             name: str, the name of saved gif file
     """
 
-    def render(self, playeridx, mode="human", name="", render_player="True"):
-
+    def render(
+        self,
+        playeridx,
+        mode="human",
+        name="",
+        render_player="True",
+    ):
         if self.viewer is None:
             self.viewer = rendering.Viewer(
                 self.server.config.serverViewBaseX, self.server.config.serverViewBaseY
@@ -821,7 +819,6 @@ class AgarEnv(gym.Env):
         self.geoms_to_render = sorted(self.geoms_to_render, key=lambda x: x.order)
         for geom in self.geoms_to_render:
             self.viewer.add_onetime(geom)
-
         return self.viewer.render(return_rgb_array=mode == "rgb_array", name=name)
 
     def render_border(self):
@@ -869,7 +866,6 @@ class AgarEnv(gym.Env):
             self.viewer.add_geom(line)
 
     def render_dir(self, center):
-
         for i in range(len(self.dir)):
             line = rendering.Line((0, 0), (self.dir[i][0] * 500, self.dir[i][1] * 500))
             line.set_color((len(self.dir) - i) / len(self.dir), i / len(self.dir), 0)
