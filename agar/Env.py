@@ -167,8 +167,10 @@ class AgarEnv(gym.Env):
                 for j in range(self.num_agents):
                     actions[j * 3 + 2] = -1.0
             first = False
-            o, _, new_obs = self.step_(actions)
-            print(len(new_obs))
+            o, _, new_obs,o_short = self.step_(actions)
+            # print(len(new_obs))
+            self.o=o
+            self.new_obs=new_obs
             reward += self.calculate_reward(new_obs)
 
         self.m_g *= self.g
@@ -212,7 +214,7 @@ class AgarEnv(gym.Env):
                     info[i]["bad_transition"] = False
                 else:
                     info[i]["bad_transition"] = True
-        return o, reward, done, info, new_obs
+        return o, reward, done, info, new_obs,o_short
 
     def step_(self, actions_):
         actions = deepcopy(actions_)
@@ -249,7 +251,9 @@ class AgarEnv(gym.Env):
         observations = []
         for i in range(self.num_agents):
             try:
-                observations_agent, dict_agent = self.parse_obs(self.agents[i], i)
+                observations_agent, dict_agent, observations_agent_short = self.parse_obs(self.agents[i], i)
+                observations_agent_2=observations_agent
+                self.observations_agent_2=observations_agent_2
                 observations.append(observations_agent)
                 observations_dict["t" + str(i)] = dict_agent
             except:
@@ -277,7 +281,9 @@ class AgarEnv(gym.Env):
         self.s_n += 1
 
         observations = {"t" + str(i): observations[i] for i in range(self.num_agents)}
-        return observations, rewards, observations_dict
+    
+
+        return observations, rewards, observations_dict,observations_agent_short
 
     """
     function reset:
@@ -332,7 +338,7 @@ class AgarEnv(gym.Env):
             observations_dict = {}
             observations = []
             for i in range(self.num_agents):
-                observations_agent, dict_agent = self.parse_obs(self.agents[i], i)
+                observations_agent, dict_agent,observations_agent_short = self.parse_obs(self.agents[i], i)
                 observations.append(observations_agent)
                 observations_dict["t" + str(i)] = dict_agent
             success = True
@@ -386,6 +392,12 @@ class AgarEnv(gym.Env):
         if len(player.cells) == 0:
             return np.zeros(s_size)
         obs = [[], [], [], [], []]
+        food=[]
+        self.food=food
+        outside_dist=[]
+        outside_eat=[]
+        self.outside_dist=outside_dist
+        self.outside_eat=outside_eat
         res_obs_dict = defaultdict(list)
         obs_keys = {
             0: "self",
@@ -394,9 +406,23 @@ class AgarEnv(gym.Env):
             3: "script_agent",
             4: "outside",
         }
+
+        food_counter=0
+        cell_counter=0
+        self.food_counter=food_counter
+        self.cell_counter=cell_counter
+
         for cell in player.viewNodes:
             (t, feature, obs_dict) = self.cell_obs(cell, player, id)
             res_obs_dict[obs_keys[t]].append(obs_dict)
+            if t == 1:
+                self.food.append(obs_dict['relative_position_x^2 + relative_position_y^2'])
+                self.food_counter+=1
+            elif t == 4:
+                self.outside_dist.append(obs_dict['relative_position_x^2 + relative_position_y^2'])
+                self.outside_eat.append(obs_dict['cell.radius * 1.15 > player.maxcell().radius'])
+                self.cell_counter+=1
+
             obs[t].append(feature)
 
         for i in range(len(obs)):
@@ -464,7 +490,10 @@ class AgarEnv(gym.Env):
             "min_radius": player.mincell().radius,
         }
 
-        return deepcopy(obs_f), deepcopy(res_obs_dict)
+        self.res_obs_dict=res_obs_dict
+        res_obs_dict_2 = [self.food,self.outside_dist,self.outside_eat,res_obs_dict["metadata"]["is_killed"]]
+        self.res_obs_dict_2=res_obs_dict_2
+        return deepcopy(obs_f), deepcopy(res_obs_dict),deepcopy(res_obs_dict_2)
 
     def cell_obs(self, cell, player, id):
         if cell.cellType == 0:

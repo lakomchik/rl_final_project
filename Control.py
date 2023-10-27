@@ -68,7 +68,7 @@ for episode in range(1):
         a = action.reshape(-1)
         observations, rewards, done, info, new_obs = env.step(a)
         # print(step, rewards)
-        # print(rewards)
+        print(rewards)
         # print(observations["t0"].shape)
 
         print(rewards)
