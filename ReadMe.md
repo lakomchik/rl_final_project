@@ -20,12 +20,11 @@ However, training was implemented only on the agent's motion action space withou
 python 3.7
 
 ## How to install
-1. Install all necessary libraries
-pip3 install -r requirements.txt 
+1. Install all necessary libraries\
+`pip3 install -r requirements.txt`
 
-2. Install baselines 
-
-`python baselines/setup.py install`
+2. Install baselines\
+`python agar/baselines/setup.py install`
 
 ## Useful info
     res_obs_dict the main dictionary that contains the observation space for each agent in the game. 
