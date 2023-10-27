@@ -22,9 +22,6 @@ class Args:
         self.gamma = 0.99
         self.eval = True
 
-
-# env.seed(0)
-
 step = 1
 
 action = np.zeros((num_agents, 3))
@@ -37,10 +34,6 @@ def on_mouse_motion(x, y, dx, dy):
     action[0][0] = (x / config.serverViewBaseX - 0.5) * 2
     action[0][1] = (y / config.serverViewBaseY - 0.5) * 2
     action[0][2] = 0
-    # for i in range(1, num_agents):
-    #     action[i][0] = action[0][0] + np.random.normal(0, 0.1)
-    #     action[i][1] = action[0][1] + np.random.normal(0, 0.1)
-
 
 def on_key_press(k, modifiers):
     if k == key.SPACE and action[0][2] == 0:
@@ -100,9 +93,6 @@ def capture_episode(env, data_folder, num_iterations):
         history.append(observations["t0"])
         history.pop(0)
         np.save(os.path.join(arr_folder, f"{i}.npy"), res_array)
-        # print(step, rewards)
-        # print(rewards)
-        # print(observations["t0"].shape)
         i += 1
         print(rewards)
     env.close()
@@ -121,6 +111,7 @@ def capture_episodes(data_folder, start_num, end_num, num_iterations):
 if __name__ == "__main__":
     config = Config()
     env = AgarEnv(Args())
+    #Enter here number of demonstration
     i = 9
     capture_episode(env, os.path.join("data", f"episode_{i}"), 1000)
     env.close()
