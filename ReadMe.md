@@ -46,7 +46,7 @@ pip3 install -r requirements.txt
         "position_x": indicates the x coordinate of the agent
         "position_y": indicates the y coordinate of the agent
         "last_action": indicates the last action of the agent such as angle and speed
-3. Useful scripts:\
+3. Useful scripts:
 * `stochastic_full_obs_space.ipynb` - for running stochastic policy approach learning
 * `behavior_cloning.ipynb` - for behavior running clonning (dataset is necessary in data folder by default)
 * `dataset_creator.py` - for saving one episode
